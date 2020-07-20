@@ -83,6 +83,6 @@ void finalize_xcb() {
     xcb_disconnect(xcb_connection);
 }
 
-void commit() {
+void flush() {
     xcb_flush(xcb_connection);
 }

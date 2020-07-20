@@ -136,6 +136,19 @@ void *get_window_property(xcb_window_t window_id, xcb_atom_t property,
     return window_property;
 }
 
+xcb_get_window_attributes_reply_t *get_window_attributes(
+    xcb_window_t window_id) {
+    xcb_get_window_attributes_cookie_t attributes_cookie;
+    xcb_get_window_attributes_reply_t *attributes;
+
+    attributes_cookie = xcb_get_window_attributes(xcb_connection,
+        window_id);
+    attributes = xcb_get_window_attributes_reply(xcb_connection,
+        attributes_cookie, NULL);
+
+    return attributes;
+}
+
 char *name_of_window(xcb_window_t window_id) {
     char *name = (char*)get_window_property(window_id, XCB_ATOM_WM_NAME,
         XCB_GET_PROPERTY_TYPE_ANY);

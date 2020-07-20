@@ -1,18 +1,14 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include <unistd.h>
 
 #include "globals.h"
 
-#include "xcb/connection.h"
+#include "wm/manager.h"
 
 unsigned int loglevel = 3;
 
 int main(int argc, char **argv) {
-    initialize_xcb();
-    printf("%s\n", "initialized");
-    sleep(10);
-    finalize_xcb();
+    return window_manager();
 }
 
 void _log(unsigned short level, const char *file, const char *function,

@@ -10,4 +10,4 @@ extern int xcb_file_descriptor;
 
 unsigned short initialize_xcb(void);
 void finalize_xcb(void);
-void apply(void);
+void flush(void);
