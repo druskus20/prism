@@ -3,6 +3,7 @@
 
 #include <xcb/xcb.h>
 
+#include "group.h"
 #include "handlers.h"
 #include "manager.h"
 
@@ -10,14 +11,26 @@
 
 #include "../xcb/connection.h"
 #include "../xcb/ewmh.h"
+#include "../xcb/pointer.h"
 
 unsigned char window_manager_is_active = 1;
+xcb_window_t focused_window; // REMOVE
+
+vector_t *managed_windows = NULL;
+vector_t *groups = NULL;
+
+group_t *focused_group = NULL;
 
 int window_manager() {
     if (!initialize_xcb() || !initialize_ewmh()) {
         log_fatal("Unable to initialize window manager.");
         return EXIT_FAILURE;
     }
+
+    managed_windows = construct_vector();
+    groups = construct_vector();
+
+    focused_group = initialize_group(); // REMOVE
 
     unsigned int index = 0;
     for (; index < SIGUNUSED; index++) {
@@ -49,6 +62,8 @@ int window_manager() {
     }
 
     log_debug("Safely shutting down");
+
+    deconstruct_vector(managed_windows);
 
     finalize_xcb();
     finalize_ewmh();

@@ -2,6 +2,8 @@
 
 #include "handlers.h"
 #include "manager.h"
+#include "tile.h"
+#include "window.h"
 
 #include "../globals.h"
 
@@ -30,8 +32,8 @@ void handle_map_request(xcb_generic_event_t *generic_event) {
     xcb_window_t window_id = event->window;
     xcb_ewmh_get_atoms_reply_t *window_type = NULL;
     xcb_get_property_cookie_t type_cookie;
-    type_cookie = xcb_ewmh_get_wm_window_type(ewmh_connection, window_id);
 
+    type_cookie = xcb_ewmh_get_wm_window_type(ewmh_connection, window_id);
     xcb_get_window_attributes_reply_t *attributes = get_window_attributes(
         window_id);
 
@@ -45,9 +47,7 @@ void handle_map_request(xcb_generic_event_t *generic_event) {
         unsigned int index = 0;
         xcb_atom_t atom;
 
-        while (index < window_type->atoms_len) {
-            atom = window_type->atoms[index++];
-
+        while ((atom = window_type->atoms[index++])) {
             // special case: ewmh_connection->_NET_WM_WINDOW_TYPE_SPLASH
             // centered
             if (atom != ewmh_connection->_NET_WM_WINDOW_TYPE_NORMAL) {
@@ -59,7 +59,13 @@ void handle_map_request(xcb_generic_event_t *generic_event) {
         xcb_ewmh_get_atoms_reply_wipe(window_type);
     }
 
-    /* It made it this far, manage that mother fucker. */
+    focused_window = window_id;
+
+    window_t *window = manage_window(window_id);
+    window_id = window->parent;
+
+    push_to_vector(focused_group->children, window);
+    tile_windows(0);
 
 map:
     map_window(window_id);
@@ -69,7 +75,9 @@ map:
 void handle_button_down(xcb_generic_event_t *generic_event) {
     log_debug("POINTER");
     xcb_grab_button(xcb_connection, 0, xcb_screen->root,
-        XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_BUTTON_MOTION,
+        XCB_EVENT_MASK_BUTTON_RELEASE |
+        XCB_EVENT_MASK_BUTTON_MOTION |
+        XCB_EVENT_MASK_POINTER_MOTION_HINT,
         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
         XCB_NONE, XCB_NONE,
         XCB_BUTTON_INDEX_1, /* Left mouse button */
@@ -84,9 +92,11 @@ void handle_button_up(xcb_generic_event_t *generic_event) {
 
 void handle_pointer(xcb_generic_event_t *generic_event) {
     xcb_query_pointer_reply_t *p = get_pointer_coordinates();
-    log_debug("MOTION %d %d",
-        p->root_x, p->root_y);
-    //
+    /*log_debug("MOTION %d %d",
+        p->root_x, p->root_y);*/
+    //change_window_geometry(focused_window, p->root_x, p->root_y, 300, 300);
+    move_group(focused_group, p->root_x, p->root_y);
+    flush();
 }
 
 /* Process signal handling */
