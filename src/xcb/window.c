@@ -62,13 +62,13 @@ void lower_window(xcb_window_t window_id) {
 
 void close_window(xcb_window_t window_id) {
     xcb_get_property_cookie_t protocols_cookie;
+    xcb_intern_atom_cookie_t delete_cookie;
+    xcb_icccm_get_wm_protocols_reply_t protocols;
+
     protocols_cookie = xcb_icccm_get_wm_protocols(xcb_connection, window_id,
         ewmh_connection->WM_PROTOCOLS);
-
-    xcb_intern_atom_cookie_t delete_cookie;
     delete_cookie = xcb_intern_atom(xcb_connection, 0, 16, "WM_DELETE_WINDOW");
 
-    xcb_icccm_get_wm_protocols_reply_t protocols;
     xcb_icccm_get_wm_protocols_reply(xcb_connection, protocols_cookie,
         &protocols, NULL);
 
@@ -76,19 +76,22 @@ void close_window(xcb_window_t window_id) {
         delete_cookie, NULL);
 
     if (reply) {
-        for (unsigned int index = 0; index < protocols.atoms_len; index++) {
-            if (protocols.atoms[index] == reply->atom) {
+        xcb_atom_t atom;
+        unsigned int index = 0;
+        xcb_client_message_event_t event = {
+            .response_type  = XCB_CLIENT_MESSAGE,
+            .format         = 32,
+            .sequence       = 0,
+            .window         = window_id,
+            .type           = ewmh_connection->WM_PROTOCOLS,
+            .data.data32    = { 0, XCB_CURRENT_TIME }
+        };
 
-                xcb_client_message_event_t event = {
-                    .response_type = XCB_CLIENT_MESSAGE,
-                    .format        = 32,
-                    .sequence      = 0,
-                    .window        = window_id,
-                    .type          = ewmh_connection->WM_PROTOCOLS,
-                    .data.data32   = {
-                        reply->atom, XCB_CURRENT_TIME
-                    }
-                };
+        while (index < protocols.atoms_len) {
+            atom = protocols.atoms[index++];
+
+            if (reply->atom == atom) {
+                event.data.data32[0] = atom;
 
                 xcb_send_event(xcb_connection, 0, window_id,
                     XCB_EVENT_MASK_NO_EVENT, (char*)&event);
@@ -109,7 +112,8 @@ void close_window(xcb_window_t window_id) {
 void change_window_geometry(xcb_window_t window_id, unsigned int x,
     unsigned int y, unsigned int height, unsigned int width) {
 
-    unsigned int value_mask = XCB_CONFIG_WINDOW_X |
+    unsigned int value_mask =
+        XCB_CONFIG_WINDOW_X     |
         XCB_CONFIG_WINDOW_Y     |
         XCB_CONFIG_WINDOW_WIDTH |
         XCB_CONFIG_WINDOW_HEIGHT;
@@ -124,10 +128,10 @@ void change_window_geometry(xcb_window_t window_id, unsigned int x,
 void *get_window_property(xcb_window_t window_id, xcb_atom_t property,
     xcb_atom_t atom_type) {
     xcb_get_property_cookie_t atom_cookie;
+    xcb_get_property_reply_t *property_cookie;
+
     atom_cookie = xcb_get_property(xcb_connection, 0, window_id, property,
         atom_type, 0, 256);
-
-    xcb_get_property_reply_t *property_cookie;
     property_cookie = xcb_get_property_reply(xcb_connection, atom_cookie, NULL);
 
     void *window_property;
