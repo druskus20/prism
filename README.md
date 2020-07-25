@@ -6,13 +6,17 @@
 
 prism is a group-based psuedo-tiling window manager for the X windowing system.
 
-## What the fuck does that mean?
+<div align="center">
+#### What the fuck does that mean?
+</div>
 
 In a nutshell, prism puts windows into groups. Within these groups,
 each window is tiled. The gimmick is that while the windows are actually
 tiled, the top-level groups follow a floating paradigm.
 
-## For why?
+<div align="center">
+#### For why?
+</div>
 
 Tiling in groups allows for windows to be easily organized.
 This can be useful for windows that take up less screen space, such as
