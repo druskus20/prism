@@ -1,7 +1,6 @@
 <div align="center">
-<img src="prism.png" width="300px">
 <h1>
-prism
+<img src="prism.png" width="100px"> prism
 </h1>
 </div>
 
