@@ -7,7 +7,7 @@
 prism is a group-based psuedo-tiling window manager for the X windowing system.
 
 <div align="center">
-#### What the fuck does that mean?
+<h4>What the fuck does that mean?</h4>
 </div>
 
 In a nutshell, prism puts windows into groups. Within these groups,
@@ -15,7 +15,7 @@ each window is tiled. The gimmick is that while the windows are actually
 tiled, the top-level groups follow a floating paradigm.
 
 <div align="center">
-#### For why?
+<h4>For why?</h4>
 </div>
 
 Tiling in groups allows for windows to be easily organized.
