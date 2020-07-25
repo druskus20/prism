@@ -1,4 +1,9 @@
-# prism
+<div align="center">
+<img src="prism.png" width="300px">
+<h1>
+prism
+</h1>
+</div>
 
 prism is a group-based psuedo-tiling window manager for the X windowing system.
 
