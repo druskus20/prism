@@ -27,11 +27,11 @@ window_t *manage_window(xcb_window_t window_id) {
         XCB_CW_COLORMAP;
 
     unsigned int values[] = {
-        0xffffff << (focused_group->children->size * 0xF), 0, 1, screen_colormap
+        0xffffff << (focused_group->children->size * 0x5), 0, 1, screen_colormap
     };
 
     xcb_create_window(xcb_connection, 32, window->parent, xcb_screen->root,
-        0, 0, 300, 300,
+        0, 0, 1, 1,
         0, /* Border size */
         XCB_WINDOW_CLASS_INPUT_OUTPUT, screen_visual->visual_id,
         masked_values, values);
@@ -45,4 +45,24 @@ window_t *manage_window(xcb_window_t window_id) {
     push_to_vector(managed_windows, window);
 
     return window;
+}
+
+void change_managed_window_coordinates(window_t *window, float x, float y) {
+    change_window_coordinates(window->parent, (unsigned int)x, (unsigned int)y);
+}
+
+void change_managed_window_dimensions(window_t *window, float height,
+    float width) {
+    change_window_dimensions(window->parent, (unsigned int)height,
+        (unsigned int)width);
+    change_window_dimensions(window->id,     (unsigned int)height,
+        (unsigned int)width);
+}
+
+void change_managed_window_geometry(window_t *window, float x, float y,
+    float height, float width) {
+    change_window_geometry(window->parent, (unsigned int)x, (unsigned int)y,
+        (unsigned int)height, (unsigned int)width);
+    change_window_dimensions(window->id, (unsigned int)height,
+        (unsigned int)width);
 }

@@ -28,12 +28,12 @@ group_t *initialize_group() {
 
 void push_window_to_group(group_t *group, window_t *window) {
     if (!group->children->size) {
-        window->height = group->height;
-        window->width  = group->width;
+        window->height = (float)group->height;
+        window->width  = (float)group->width;
 
-        change_window_geometry(window->parent,
-            (unsigned int)window->x + group->x, (unsigned int)window->y + group->y,
-            (unsigned int)window->height, (unsigned int)window->width);
+        change_managed_window_geometry(window,
+            window->x + group->x, window->y + group->y,
+            window->height, window->width);
     } else {
         split_current_view_port(group->children->size % 4, group, focused_window, window);
     }
@@ -46,11 +46,9 @@ void move_group(group_t *group, unsigned int x, unsigned int y) {
     group->y = y;
 
     window_t *window = NULL;
-    while ((window = vector_iterator(group->children))) {
-        change_window_geometry(window->parent,
-            (unsigned int)window->x + group->x, (unsigned int)window->y + group->y,
-            (unsigned int)window->height, (unsigned int)window->width);
-    }
+    while ((window = vector_iterator(group->children)))
+        change_managed_window_coordinates(window,
+            window->x + group->x, window->y + group->y);
 }
 
 void resize_group(group_t *group, unsigned int height, unsigned int width) {
@@ -65,18 +63,16 @@ void resize_group(group_t *group, unsigned int height, unsigned int width) {
     height_proportion = height / (float)group->height;
     width_proportion = width  / (float)group->width;
 
-    log_debug("%f %f", height_proportion, width_proportion);
-
     window_t *window = NULL;
     while ((window = vector_iterator(group->children))) {
+        window->x = (window->x * width_proportion);
+        window->y = (window->y * height_proportion);
         window->height = window->height * height_proportion;
         window->width = window->width * width_proportion;
-        window->x = window->x * width_proportion;
-        window->y = window->y * height_proportion;
 
-        change_window_geometry(window->parent,
-            (unsigned int)window->x, (unsigned int)window->y,
-            (unsigned int)window->height, (unsigned int)window->width);
+        change_managed_window_geometry(window,
+            window->x  + group->x, window->y + group->y,
+            window->height, window->width);
     }
 
     group->height = height;

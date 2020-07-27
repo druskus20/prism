@@ -11,3 +11,6 @@ typedef struct {
 } window_t;
 
 window_t *manage_window(xcb_window_t);
+void change_managed_window_coordinates(window_t*, float, float);
+void change_managed_window_dimensions(window_t*, float, float);
+void change_managed_window_geometry(window_t*, float, float, float, float);

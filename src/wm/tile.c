@@ -48,11 +48,11 @@ void split_current_view_port(split_mode_t splitting_mode, group_t *group,
             break;
     }
 
-    change_window_geometry(originating_window->parent,
-        (unsigned int)originating_window->x + group->x, (unsigned int)originating_window->y + group->y,
-        (unsigned int)originating_window->height, (unsigned int)originating_window->width);
+    change_managed_window_geometry(originating_window,
+        originating_window->x + group->x, originating_window->y + group->y,
+        originating_window->height,       originating_window->width);
 
-    change_window_geometry(introducing_window->parent,
-        (unsigned int)introducing_window->x + group->x, (unsigned int)introducing_window->y + group->y,
-        (unsigned int)introducing_window->height, (unsigned int)introducing_window->width);
+    change_managed_window_geometry(introducing_window,
+        introducing_window->x + group->x, introducing_window->y + group->y,
+        introducing_window->height,       introducing_window->width);
 }
