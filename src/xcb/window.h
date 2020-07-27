@@ -14,6 +14,8 @@ void lower_window(xcb_window_t);
 
 void close_window(xcb_window_t);
 
+void change_window_coordinates(xcb_window_t, unsigned int, unsigned int);
+void change_window_dimensions(xcb_window_t, unsigned int, unsigned int);
 void change_window_geometry(xcb_window_t, unsigned int, unsigned int,
     unsigned int, unsigned int);
 

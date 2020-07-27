@@ -91,6 +91,28 @@ void close_window(xcb_window_t window_id) {
     xcb_kill_client(xcb_connection, window_id);
 }
 
+void change_window_coordinates(xcb_window_t window_id, unsigned int x,
+    unsigned int y) {
+
+    unsigned int value_mask =
+        XCB_CONFIG_WINDOW_X |
+        XCB_CONFIG_WINDOW_Y;
+    unsigned int values[2] = { x, y };
+
+    configure_window(window_id, value_mask, values);
+}
+
+void change_window_dimensions(xcb_window_t window_t, unsigned int height,
+    unsigned int width) {
+
+    unsigned int value_mask =
+        XCB_CONFIG_WINDOW_WIDTH |
+        XCB_CONFIG_WINDOW_HEIGHT;
+    unsigned int values[2] = { width, height };
+
+    configure_window(window_id, value_mask, values);
+}
+
 void change_window_geometry(xcb_window_t window_id, unsigned int x,
     unsigned int y, unsigned int height, unsigned int width) {
 
