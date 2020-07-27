@@ -102,7 +102,7 @@ void change_window_coordinates(xcb_window_t window_id, unsigned int x,
     configure_window(window_id, value_mask, values);
 }
 
-void change_window_dimensions(xcb_window_t window_t, unsigned int height,
+void change_window_dimensions(xcb_window_t window_id, unsigned int height,
     unsigned int width) {
 
     unsigned int value_mask =
