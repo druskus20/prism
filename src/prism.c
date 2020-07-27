@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "globals.h"
+#include "prism.h"
 
 #include "wm/manager.h"
 
@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 /* Helpers */
 
 vector_t *construct_vector() {
-    vector_t *vector = (vector_t*)calloc(1, sizeof(vector_t));
+    vector_t *vector = calloc(1, sizeof(vector_t));
     vector->memory = 1;
     vector->size = 0;
     vector->elements = calloc(1, sizeof(void*));

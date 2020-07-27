@@ -1,21 +1,22 @@
 #include <stdlib.h>
 
 #include "manager.h"
+#include "group.h"
 #include "window.h"
 
-#include "../globals.h"
+#include "../prism.h"
 
 #include "../xcb/connection.h"
 #include "../xcb/window.h"
 
 window_t *manage_window(xcb_window_t window_id) {
-    window_t *window = (window_t *)calloc(1, sizeof(window_t));
+    window_t *window = calloc(1, sizeof(window_t));
 
     window->id = window_id;
     window->parent = xcb_generate_id(xcb_connection);
 
     window->x      = window->y     = 0;
-    window->height = window->width = 300;
+    window->height = window->width = 1; // We don't know yet
 
     /* Create the parent window */
 
@@ -24,8 +25,9 @@ window_t *manage_window(xcb_window_t window_id) {
         XCB_CW_BORDER_PIXEL      |
         XCB_CW_OVERRIDE_REDIRECT |
         XCB_CW_COLORMAP;
+
     unsigned int values[] = {
-        0, 0, 1, screen_colormap
+        0xffffff << (focused_group->children->size * 0xF), 0, 1, screen_colormap
     };
 
     xcb_create_window(xcb_connection, 32, window->parent, xcb_screen->root,

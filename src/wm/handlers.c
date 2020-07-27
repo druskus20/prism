@@ -5,7 +5,7 @@
 #include "tile.h"
 #include "window.h"
 
-#include "../globals.h"
+#include "../prism.h"
 
 #include "../xcb/connection.h"
 #include "../xcb/ewmh.h"
@@ -24,6 +24,8 @@ void (*signals[SIGUNUSED])(void) = {
     [SIGINT]    = handle_termination_signal,
     [SIGTERM]   = handle_termination_signal
 };
+
+void *store;
 
 void handle_map_request(xcb_generic_event_t *generic_event) {
     xcb_map_request_event_t *event;
@@ -59,13 +61,11 @@ void handle_map_request(xcb_generic_event_t *generic_event) {
         xcb_ewmh_get_atoms_reply_wipe(window_type);
     }
 
-    focused_window = window_id;
-
     window_t *window = manage_window(window_id);
     window_id = window->parent;
 
-    push_to_vector(focused_group->children, window);
-    tile_windows(0);
+    push_window_to_group(focused_group, window);
+    focused_window = window;
 
 map:
     map_window(window_id);
@@ -73,29 +73,49 @@ map:
 }
 
 void handle_button_down(xcb_generic_event_t *generic_event) {
+    xcb_button_press_event_t *event;
+    event = (xcb_button_press_event_t*)generic_event;
+
+xcb_warp_pointer(xcb_connection, XCB_NONE, XCB_NONE, 0, 0, 0, 0,
+	focused_group->width, focused_group->height);
+
     log_debug("POINTER");
-    xcb_grab_button(xcb_connection, 0, xcb_screen->root,
+    xcb_grab_pointer(xcb_connection, XCB_NONE,
+        xcb_screen->root,
         XCB_EVENT_MASK_BUTTON_RELEASE |
         XCB_EVENT_MASK_BUTTON_MOTION |
         XCB_EVENT_MASK_POINTER_MOTION_HINT,
-        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC,
-        XCB_NONE, XCB_NONE,
-        XCB_BUTTON_INDEX_1, /* Left mouse button */
-        XCB_MOD_MASK_ANY);
+        XCB_GRAB_MODE_ASYNC,
+        XCB_GRAB_MODE_ASYNC,
+        XCB_NONE,
+        XCB_NONE,
+        XCB_CURRENT_TIME);
     flush();
 }
 
 void handle_button_up(xcb_generic_event_t *generic_event) {
     log_debug("POINTER UP");
-    xcb_ungrab_button(xcb_connection, XCB_BUTTON_INDEX_ANY, xcb_screen->root, XCB_MOD_MASK_ANY);
+    xcb_ungrab_pointer(xcb_connection, XCB_CURRENT_TIME);
 }
 
 void handle_pointer(xcb_generic_event_t *generic_event) {
+    xcb_motion_notify_event_t *event;
+    event = (xcb_motion_notify_event_t*)generic_event;
+
     xcb_query_pointer_reply_t *p = get_pointer_coordinates();
-    /*log_debug("MOTION %d %d",
-        p->root_x, p->root_y);*/
-    //change_window_geometry(focused_window, p->root_x, p->root_y, 300, 300);
-    move_group(focused_group, p->root_x, p->root_y);
+    if (event->state & XCB_BUTTON_MASK_1) {
+        move_group(focused_group, p->root_x, p->root_y);
+    } else if (event->state & XCB_BUTTON_MASK_3) {
+        unsigned int height, width;
+
+	    width = p->root_x - focused_group->x;
+	    height = p->root_y - focused_group->y;
+
+
+        log_debug("%d - %d", height, width);
+        resize_group(focused_group, height, width);
+    }
+
     flush();
 }
 

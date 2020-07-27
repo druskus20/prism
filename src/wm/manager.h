@@ -4,11 +4,11 @@
 
 #include "group.h"
 
-#include "../globals.h"
+#include "../prism.h"
 
 extern unsigned char window_manager_is_active;
 
-extern xcb_window_t focused_window; // REMOVE
+extern window_t *focused_window; // REMOVE
 extern group_t *focused_group;
 
 extern vector_t *managed_windows;
