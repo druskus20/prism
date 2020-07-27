@@ -2,7 +2,7 @@
 
 #include "connection.h"
 
-#include "../globals.h"
+#include "../prism.h"
 
 xcb_connection_t *xcb_connection;
 xcb_screen_t *xcb_screen;

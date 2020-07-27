@@ -4,25 +4,17 @@
 #include "ewmh.h"
 #include "window.h"
 
-#include "../globals.h"
-
 void configure_window(xcb_window_t window_id, unsigned int value_mask,
     unsigned int *values) {
     xcb_configure_window(xcb_connection, window_id, value_mask, values);
-
-    log_debug("Window(%08x) configured", window_id);
 }
 
 void map_window(xcb_window_t window_id) {
     xcb_map_window(xcb_connection, window_id);
-
-    log_debug("Window(%08x) mapped", window_id);
 }
 
 void unmap_window(xcb_window_t window_id) {
     xcb_unmap_window(xcb_connection, window_id);
-
-    log_debug("Window(%08x) unmapped", window_id);
 }
 
 void focus_window(xcb_window_t window_id) {
@@ -38,8 +30,6 @@ void focus_window(xcb_window_t window_id) {
     xcb_set_input_focus(xcb_connection, XCB_INPUT_FOCUS_POINTER_ROOT,
         window_id, XCB_CURRENT_TIME);
     xcb_ewmh_set_active_window(ewmh_connection, 0, window_id);
-
-    log_debug("Window(%08x) focused", window_id);
 }
 
 void raise_window(xcb_window_t window_id) {
@@ -47,8 +37,6 @@ void raise_window(xcb_window_t window_id) {
     unsigned int value = XCB_STACK_MODE_ABOVE;
 
     configure_window(window_id, value_mask, &value);
-
-    log_debug("Window(%08x) raised", window_id);
 }
 
 void lower_window(xcb_window_t window_id) {
@@ -56,8 +44,6 @@ void lower_window(xcb_window_t window_id) {
     unsigned int value = XCB_STACK_MODE_BELOW;
 
     configure_window(window_id, value_mask, &value);
-
-    log_debug("Window(%08x) lowered", window_id);
 }
 
 void close_window(xcb_window_t window_id) {
@@ -96,8 +82,6 @@ void close_window(xcb_window_t window_id) {
                 xcb_send_event(xcb_connection, 0, window_id,
                     XCB_EVENT_MASK_NO_EVENT, (char*)&event);
                 xcb_icccm_get_wm_protocols_reply_wipe(&protocols);
-
-                log_debug("Window(%08x) closed(WM_PROTOCOLS)", window_id);
                 return;
             }
         }
@@ -105,8 +89,6 @@ void close_window(xcb_window_t window_id) {
 
     xcb_icccm_get_wm_protocols_reply_wipe(&protocols);
     xcb_kill_client(xcb_connection, window_id);
-
-    log_debug("Window(%08x) closed(xcb_kill_client)", window_id);
 }
 
 void change_window_geometry(xcb_window_t window_id, unsigned int x,
@@ -120,9 +102,6 @@ void change_window_geometry(xcb_window_t window_id, unsigned int x,
     unsigned int values[4] = { x, y, width, height };
 
     configure_window(window_id, value_mask, values);
-
-    log_debug("Window(%08x) geometry changed %dx%d (%d,%d)", window_id,
-        width, height, x, y);
 }
 
 void *get_window_property(xcb_window_t window_id, xcb_atom_t property,

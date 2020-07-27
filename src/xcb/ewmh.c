@@ -4,7 +4,7 @@
 #include "connection.h"
 #include "ewmh.h"
 
-#include "../globals.h"
+#include "../prism.h"
 
 xcb_ewmh_connection_t *ewmh_connection;
 xcb_window_t ewmh_window;
@@ -20,8 +20,7 @@ unsigned short initialize_ewmh() {
         XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
         XCB_CW_EVENT_MASK, &events);
 
-    ewmh_connection = (xcb_ewmh_connection_t*)calloc(1,
-        sizeof(xcb_ewmh_connection_t));
+    ewmh_connection = calloc(1, sizeof(xcb_ewmh_connection_t));
 
     xcb_intern_atom_cookie_t *initialize_atoms_cookie;
     initialize_atoms_cookie = xcb_ewmh_init_atoms(xcb_connection,
