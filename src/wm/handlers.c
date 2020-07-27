@@ -65,6 +65,10 @@ void handle_map_request(xcb_generic_event_t *generic_event) {
     window_id = window->parent;
 
     push_window_to_group(focused_group, window);
+
+    if (focused_group->children->size == 5) // TESTING
+        focused_group = initialize_group(); // TESTING
+
     focused_window = window;
 
 map:
@@ -94,8 +98,7 @@ xcb_warp_pointer(xcb_connection, XCB_NONE, XCB_NONE, 0, 0, 0, 0,
 }
 
 void handle_button_up(xcb_generic_event_t *generic_event) {
-    log_debug("POINTER UP");
-    xcb_ungrab_pointer(xcb_connection, XCB_CURRENT_TIME);
+    //xcb_ungrab_pointer(xcb_connection, XCB_CURRENT_TIME);
 }
 
 void handle_pointer(xcb_generic_event_t *generic_event) {
@@ -111,8 +114,6 @@ void handle_pointer(xcb_generic_event_t *generic_event) {
 	    width = p->root_x - focused_group->x;
 	    height = p->root_y - focused_group->y;
 
-
-        log_debug("%d - %d", height, width);
         resize_group(focused_group, height, width);
     }
 
