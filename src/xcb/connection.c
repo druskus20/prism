@@ -2,7 +2,7 @@
 
 #include "connection.h"
 
-#include "../prism.h"
+#include "../util/logging.h"
 
 xcb_connection_t *xcb_connection;
 xcb_screen_t *xcb_screen;

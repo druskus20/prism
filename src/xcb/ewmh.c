@@ -4,7 +4,7 @@
 #include "connection.h"
 #include "ewmh.h"
 
-#include "../prism.h"
+#include "../util/logging.h"
 
 xcb_ewmh_connection_t *ewmh_connection;
 xcb_window_t ewmh_window;
