@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include <poll.h>
 
 #include <xcb/xcb.h>
 
@@ -7,7 +6,7 @@
 #include "handlers.h"
 #include "manager.h"
 
-#include "../prism.h"
+#include "../util/logging.h"
 
 #include "../xcb/connection.h"
 #include "../xcb/ewmh.h"
@@ -21,7 +20,7 @@ vector_t *groups = NULL;
 window_t *focused_window = NULL; // REMOVE
 group_t *focused_group = NULL;
 
-int window_manager() {
+unsigned int initialize_prism() {
     if (!initialize_xcb() || !initialize_ewmh()) {
         log_fatal("Unable to initialize window manager.");
         return EXIT_FAILURE;
@@ -48,27 +47,15 @@ int window_manager() {
             XCB_EVENT_MASK_BUTTON_RELEASE, XCB_GRAB_MODE_ASYNC,
             XCB_GRAB_MODE_ASYNC, xcb_screen->root, XCB_NONE, XCB_BUTTON_INDEX_3, XCB_MOD_MASK_ANY);
 
-    struct pollfd file_descriptors[1] = {
-        { xcb_file_descriptor, .events = POLLIN },
-    };
+    return 1;
+}
 
-    while (window_manager_is_active) {
-        if (poll(file_descriptors, 1, -1)) {
-            if (file_descriptors[0].revents & POLLIN)
-                handle_xcb_events();
-
-            // if (file_descriptors[1].revents & POLLIN)
-        }
-    }
-
-    log_debug("Safely shutting down");
-
+void finalize_prism() {
+    deconstruct_vector(groups);
     deconstruct_vector(managed_windows);
 
     finalize_xcb();
     finalize_ewmh();
-
-    return EXIT_SUCCESS;
 }
 
 void handle_xcb_events() {

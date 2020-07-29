@@ -3,8 +3,6 @@
 #include "group.h"
 #include "window.h"
 
-#include "../prism.h"
-
 typedef enum {
     NORTHERN_SPLIT,
     SOUTHERN_SPLIT,

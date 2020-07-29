@@ -4,8 +4,6 @@
 #include "group.h"
 #include "window.h"
 
-#include "../prism.h"
-
 #include "../xcb/connection.h"
 #include "../xcb/window.h"
 

@@ -6,8 +6,6 @@
 #include "tile.h"
 #include "window.h"
 
-#include "../prism.h"
-
 #include "../xcb/connection.h"
 #include "../xcb/pointer.h"
 #include "../xcb/window.h"

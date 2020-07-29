@@ -37,6 +37,7 @@ prepare:
 	@[ -d $(BUILDPREFIX)/wm ] || mkdir -p $(BUILDPREFIX)/wm
 	@[ -d $(BUILDPREFIX)/xcb ] || mkdir -p $(BUILDPREFIX)/xcb
 	@[ -d $(BUILDPREFIX)/ipc ] || mkdir -p $(BUILDPREFIX)/ipc
+	@[ -d $(BUILDPREFIX)/util ] || mkdir -p $(BUILDPREFIX)/util
 
 clean:
 	$(RM) -r $(BUILDPREFIX)

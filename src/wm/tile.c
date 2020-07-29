@@ -3,8 +3,6 @@
 #include "tile.h"
 #include "window.h"
 
-#include "../prism.h"
-
 #include "../xcb/window.h"
 
 // TODO: master/stack tiling?

@@ -2,7 +2,7 @@
 
 #include "window.h"
 
-#include "../prism.h"
+#include "../util/vector.h"
 
 typedef struct {
     unsigned int x, y, height, width;

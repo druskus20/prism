@@ -4,7 +4,7 @@
 
 #include "group.h"
 
-#include "../prism.h"
+#include "../util/vector.h"
 
 extern unsigned char window_manager_is_active;
 
@@ -14,6 +14,7 @@ extern group_t *focused_group;
 extern vector_t *managed_windows;
 extern vector_t *groups;
 
-int window_manager(void);
+unsigned int initialize_prism(void);
+void finalize_prism(void);
 void handle_xcb_events(void);
 void handle_signals(int);
