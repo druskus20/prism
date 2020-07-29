@@ -17,9 +17,7 @@ int main(int argc, char **argv) {
         { xcb_file_descriptor, .events = POLLIN }
     };
 
-    while (window_manager_is_active) {
-        poll(file_descriptors, 1 /* number of descriptors*/, -1);
-
+    while (window_manager_is_active && poll(file_descriptors, 1, -1)) {
         if (file_descriptors[0].revents & POLLIN)
             handle_xcb_events();
     }
