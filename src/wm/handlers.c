@@ -5,27 +5,29 @@
 #include "tile.h"
 #include "window.h"
 
+#include "../ipc/parsing.h"
 #include "../util/logging.h"
-
 #include "../xcb/connection.h"
 #include "../xcb/ewmh.h"
 #include "../xcb/pointer.h"
 #include "../xcb/window.h"
 
 void (*xcb_events[XCB_NO_OPERATION])(xcb_generic_event_t*) = {
-    [XCB_MAP_REQUEST]   = handle_map_request,
+    [XCB_MAP_REQUEST]    = handle_map_request,
 
-    [XCB_BUTTON_PRESS]      = handle_button_down,
-    [XCB_BUTTON_RELEASE]    = handle_button_up,
-    [XCB_MOTION_NOTIFY]     = handle_pointer,
+    [XCB_BUTTON_PRESS]   = handle_button_down,
+    [XCB_BUTTON_RELEASE] = handle_button_up,
+    [XCB_MOTION_NOTIFY]  = handle_pointer,
+};
+
+void (*ipc_commands[IPC_CMD_NULL])(ipc_arg_t**) = {
+    [IPC_CMD_QUIT] = handle_quit_command,
 };
 
 void (*signals[SIGUNUSED])(void) = {
-    [SIGINT]    = handle_termination_signal,
-    [SIGTERM]   = handle_termination_signal
+    [SIGINT]  = handle_termination_signal,
+    [SIGTERM] = handle_termination_signal
 };
-
-void *store;
 
 void handle_map_request(xcb_generic_event_t *generic_event) {
     xcb_map_request_event_t *event;
@@ -118,6 +120,13 @@ void handle_pointer(xcb_generic_event_t *generic_event) {
     }
 
     flush();
+}
+
+/* IPC command handling */
+void handle_quit_command(ipc_arg_t **args) {
+    (void)args;
+
+    window_manager_is_active = 0;
 }
 
 /* Process signal handling */
