@@ -6,8 +6,8 @@
 #include "handlers.h"
 #include "manager.h"
 
+#include "../ipc/socket.h"
 #include "../util/logging.h"
-
 #include "../xcb/connection.h"
 #include "../xcb/ewmh.h"
 #include "../xcb/pointer.h"
@@ -21,9 +21,10 @@ window_t *focused_window = NULL; // REMOVE
 group_t *focused_group = NULL;
 
 unsigned int initialize_prism() {
-    if (!initialize_xcb() || !initialize_ewmh()) {
+    if (!initialize_xcb() || !initialize_ewmh() ||
+        !initialize_socket(WINDOW_MANAGER_IPC)) {
         log_fatal("Unable to initialize window manager.");
-        return EXIT_FAILURE;
+        return 0;
     }
 
     managed_windows = construct_vector();
@@ -54,8 +55,9 @@ void finalize_prism() {
     deconstruct_vector(groups);
     deconstruct_vector(managed_windows);
 
-    finalize_xcb();
+    finalize_socket();
     finalize_ewmh();
+    finalize_xcb();
 }
 
 void handle_xcb_events() {
@@ -70,6 +72,15 @@ void handle_xcb_events() {
 
         free(xcb_event);
     }
+}
+
+void handle_ipc_input() {
+    char *input = read_from_socket();
+
+    //log_debug("%s", input);
+    ipc_commands[IPC_CMD_QUIT](NULL);
+
+    free(input);
 }
 
 void handle_signals(int signal) {
