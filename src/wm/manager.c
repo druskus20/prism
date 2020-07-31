@@ -3,9 +3,11 @@
 #include <xcb/xcb.h>
 
 #include "group.h"
-#include "handlers.h"
 #include "manager.h"
 
+#include "../handlers/ipc.h"
+#include "../handlers/signal.h"
+#include "../handlers/xcb.h"
 #include "../ipc/socket.h"
 #include "../util/logging.h"
 #include "../xcb/connection.h"
@@ -77,8 +79,21 @@ void handle_xcb_events() {
 void handle_ipc_input() {
     char *input = read_from_socket();
 
-    //log_debug("%s", input);
-    ipc_commands[IPC_CMD_QUIT](NULL);
+    ipc_command_t command = ipc_determine_command(input);
+    char **args = ipc_split_input(input);
+
+    char *response;
+    if (ipc_commands[command])
+        response = ipc_commands[command](args);
+
+    if (response) {
+        log_debug("responding: %s", response);
+        write_to_socket(response);
+    }
+
+    unsigned int index = 0;
+    while (args[index])
+        free(args[index++]);
 
     free(input);
 }

@@ -1,12 +1,9 @@
-#include <stdlib.h>
+#include "xcb.h"
 
-#include "handlers.h"
-#include "manager.h"
-#include "tile.h"
-#include "window.h"
-
-#include "../ipc/parsing.h"
 #include "../util/logging.h"
+#include "../wm/manager.h"
+#include "../wm/tile.h"
+#include "../wm/window.h"
 #include "../xcb/connection.h"
 #include "../xcb/ewmh.h"
 #include "../xcb/pointer.h"
@@ -20,14 +17,7 @@ void (*xcb_events[XCB_NO_OPERATION])(xcb_generic_event_t*) = {
     [XCB_MOTION_NOTIFY]  = handle_pointer,
 };
 
-void (*ipc_commands[IPC_CMD_NULL])(ipc_arg_t**) = {
-    [IPC_CMD_QUIT] = handle_quit_command,
-};
-
-void (*signals[SIGUNUSED])(void) = {
-    [SIGINT]  = handle_termination_signal,
-    [SIGTERM] = handle_termination_signal
-};
+void *store;
 
 void handle_map_request(xcb_generic_event_t *generic_event) {
     xcb_map_request_event_t *event;
@@ -82,9 +72,6 @@ void handle_button_down(xcb_generic_event_t *generic_event) {
     xcb_button_press_event_t *event;
     event = (xcb_button_press_event_t*)generic_event;
 
-xcb_warp_pointer(xcb_connection, XCB_NONE, XCB_NONE, 0, 0, 0, 0,
-	focused_group->width, focused_group->height);
-
     log_debug("POINTER");
     xcb_grab_pointer(xcb_connection, XCB_NONE,
         xcb_screen->root,
@@ -97,6 +84,8 @@ xcb_warp_pointer(xcb_connection, XCB_NONE, XCB_NONE, 0, 0, 0, 0,
         XCB_NONE,
         XCB_CURRENT_TIME);
     flush();
+
+    store = get_pointer_coordinates();
 }
 
 void handle_button_up(xcb_generic_event_t *generic_event) {
@@ -120,16 +109,4 @@ void handle_pointer(xcb_generic_event_t *generic_event) {
     }
 
     flush();
-}
-
-/* IPC command handling */
-void handle_quit_command(ipc_arg_t **args) {
-    (void)args;
-
-    window_manager_is_active = 0;
-}
-
-/* Process signal handling */
-void handle_termination_signal() {
-    window_manager_is_active = 0;
 }
