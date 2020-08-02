@@ -38,6 +38,7 @@ prepare:
 	@[ -d $(BUILDPREFIX)/xcb ] || mkdir -p $(BUILDPREFIX)/xcb
 	@[ -d $(BUILDPREFIX)/ipc ] || mkdir -p $(BUILDPREFIX)/ipc
 	@[ -d $(BUILDPREFIX)/util ] || mkdir -p $(BUILDPREFIX)/util
+	@[ -d $(BUILDPREFIX)/handlers ] || mkdir -p $(BUILDPREFIX)/handlers
 
 clean:
 	$(RM) -r $(BUILDPREFIX)
