@@ -3,12 +3,17 @@
 #include <stdarg.h>
 #include <poll.h>
 
+#include "ipc/controller.h"
 #include "ipc/socket.h"
 #include "util/logging.h"
 #include "wm/manager.h"
 #include "xcb/connection.h"
 
 int main(int argc, char **argv) {
+    if (argc > 1) {
+        return prism_controller(argc, argv);
+    }
+
     if (!initialize_prism()) {
         log_fatal("Unable to initialize prism.");
         return EXIT_FAILURE;
