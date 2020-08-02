@@ -10,7 +10,8 @@
 #include "../xcb/window.h"
 
 void (*xcb_events[XCB_NO_OPERATION])(xcb_generic_event_t*) = {
-    [XCB_MAP_REQUEST]    = handle_map_request,
+    [XCB_MAP_REQUEST]    = handle_window_map_request,
+    [XCB_DESTROY_NOTIFY] = handle_window_destruction,
 
     [XCB_BUTTON_PRESS]   = handle_button_down,
     [XCB_BUTTON_RELEASE] = handle_button_up,
@@ -19,7 +20,7 @@ void (*xcb_events[XCB_NO_OPERATION])(xcb_generic_event_t*) = {
 
 void *store;
 
-void handle_map_request(xcb_generic_event_t *generic_event) {
+void handle_window_map_request(xcb_generic_event_t *generic_event) {
     xcb_map_request_event_t *event;
     event = (xcb_map_request_event_t *)generic_event;
 
@@ -57,15 +58,36 @@ void handle_map_request(xcb_generic_event_t *generic_event) {
     window_id = window->parent;
 
     push_window_to_group(focused_group, window);
-
-    if (focused_group->children->size == 5) // TESTING
-        focused_group = initialize_group(); // TESTING
-
     focused_window = window;
-
 map:
     map_window(window_id);
     flush();
+}
+
+void handle_window_destruction(xcb_generic_event_t *generic_event) {
+    xcb_destroy_notify_event_t *event;
+    event = (xcb_destroy_notify_event_t *)generic_event;
+
+    xcb_window_t window_id = event->window;
+
+    unsigned int index = 0;
+    window_t *window = NULL;
+    while ((window = vector_iterator(managed_windows))) {
+
+        if (window->id == window_id) {
+            index = managed_windows->size - managed_windows->remaining;
+            xcb_destroy_window(xcb_connection, window->parent);
+
+            pull_from_vector(managed_windows, index);
+            reset_vector_iterator(managed_windows);
+
+            free(window);
+
+            flush();
+            return;
+        }
+
+    }
 }
 
 void handle_button_down(xcb_generic_event_t *generic_event) {
@@ -80,7 +102,7 @@ void handle_button_down(xcb_generic_event_t *generic_event) {
         XCB_EVENT_MASK_POINTER_MOTION_HINT,
         XCB_GRAB_MODE_ASYNC,
         XCB_GRAB_MODE_ASYNC,
-        XCB_NONE,
+        xcb_screen->root,
         XCB_NONE,
         XCB_CURRENT_TIME);
     flush();
@@ -89,7 +111,7 @@ void handle_button_down(xcb_generic_event_t *generic_event) {
 }
 
 void handle_button_up(xcb_generic_event_t *generic_event) {
-    //xcb_ungrab_pointer(xcb_connection, XCB_CURRENT_TIME);
+    xcb_ungrab_pointer(xcb_connection, XCB_CURRENT_TIME);
 }
 
 void handle_pointer(xcb_generic_event_t *generic_event) {
