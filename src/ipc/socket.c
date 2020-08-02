@@ -8,6 +8,7 @@
 #include "../util/logging.h"
 
 int socket_file_descriptor;
+ipc_mode_t ipc_mode;
 
 unsigned short initialize_socket(ipc_mode_t mode) {
     struct sockaddr_un address = {
@@ -24,6 +25,7 @@ unsigned short initialize_socket(ipc_mode_t mode) {
         return 0;
     }
 
+    ipc_mode = mode;
     switch (mode) {
         case WINDOW_MANAGER_IPC:
             if (bind(socket_file_descriptor, generic, sizeof(address)) < 0 ||
@@ -43,18 +45,22 @@ unsigned short initialize_socket(ipc_mode_t mode) {
     return 1;
 }
 
-void write_to_socket(char *buffer) {
-    write(socket_file_descriptor, buffer, 256);
+void write_to_socket(char *buffer, int file_descriptor) {
+    write(file_descriptor, buffer, 256);
 }
 
-char *read_from_socket() {
+int accept_connection() {
     int file_descriptor;
 
     if (!(file_descriptor = accept(socket_file_descriptor, NULL, 0))) {
         log_fatal("Unable to accept socket connection.");
-        return NULL;
+        return -1;
     }
 
+    return file_descriptor;
+}
+
+char *read_from_socket(int file_descriptor) {
     char *buffer = calloc(256, sizeof(char));
     read(file_descriptor, buffer, 256);
 
@@ -62,6 +68,7 @@ char *read_from_socket() {
 }
 
 void finalize_socket() {
-    unlink("/tmp/prism.socket");
     close(socket_file_descriptor);
+    if (ipc_mode == WINDOW_MANAGER_IPC)
+        unlink("/tmp/prism.socket");
 }

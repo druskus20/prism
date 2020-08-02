@@ -7,6 +7,10 @@ typedef enum {
     CONTROLLER
 } ipc_mode_t;
 
+ipc_mode_t ipc_mode;
+
 unsigned short initialize_socket(ipc_mode_t);
-char *read_from_socket(void);
+int accept_connection(void);
+void write_to_socket(char*, int);
+char *read_from_socket(int);
 void finalize_socket(void);
