@@ -25,7 +25,7 @@ window_t *manage_window(xcb_window_t window_id) {
         XCB_CW_COLORMAP;
 
     unsigned int values[] = {
-        0xffffff << (focused_group->children->size * 0x5), 0, 1, screen_colormap
+        0xffffff << (0x5 * managed_windows->size), 0, 1, screen_colormap
     };
 
     xcb_create_window(xcb_connection, 32, window->parent, xcb_screen->root,
@@ -35,7 +35,8 @@ window_t *manage_window(xcb_window_t window_id) {
         masked_values, values);
 
     values[0] = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY;
-    configure_window(window->parent, XCB_CW_EVENT_MASK, values);
+    xcb_change_window_attributes(xcb_connection, window->parent,
+        XCB_CW_EVENT_MASK, values);
 
     xcb_reparent_window(xcb_connection, window->id, window->parent, 0, 0);
     map_window(window->id);

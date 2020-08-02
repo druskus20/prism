@@ -73,10 +73,9 @@ void handle_window_destruction(xcb_generic_event_t *generic_event) {
 
     unsigned int index = 0;
     window_t *window = NULL;
-    while ((window = vector_iterator(managed_windows))) {
-
+    for (; index < managed_windows->size; index++) {
+        window = get_from_vector(managed_windows, index);
         if (window->id == window_id) {
-            index = managed_windows->size - managed_windows->remaining;
             xcb_destroy_window(xcb_connection, window->parent);
 
             pull_from_vector(managed_windows, index);
@@ -87,7 +86,6 @@ void handle_window_destruction(xcb_generic_event_t *generic_event) {
             flush();
             return;
         }
-
     }
 }
 
