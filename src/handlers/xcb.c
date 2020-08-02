@@ -58,6 +58,7 @@ void handle_window_map_request(xcb_generic_event_t *generic_event) {
     window_id = window->parent;
 
     push_window_to_group(focused_group, window);
+    push_to_vector(managed_windows, window);
     focused_window = window;
 map:
     map_window(window_id);
