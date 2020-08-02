@@ -40,15 +40,17 @@ unsigned int initialize_prism() {
             signal(index, handle_signals);
     }
 
-    /* Attach to pointer, remove at some point */
     initialize_pointer();
+    /* Attach to pointer, remove at some point
     xcb_grab_button(xcb_connection, 0, xcb_screen->root, XCB_EVENT_MASK_BUTTON_PRESS |
         XCB_EVENT_MASK_BUTTON_RELEASE, XCB_GRAB_MODE_ASYNC,
-        XCB_GRAB_MODE_ASYNC, xcb_screen->root, XCB_NONE, XCB_BUTTON_INDEX_1, XCB_MOD_MASK_ANY);
+        XCB_GRAB_MODE_ASYNC, xcb_screen->root, XCB_NONE, XCB_BUTTON_INDEX_1, XCB_MOD_MASK_SHIFT);
 
     xcb_grab_button(xcb_connection, 0, xcb_screen->root, XCB_EVENT_MASK_BUTTON_PRESS |
             XCB_EVENT_MASK_BUTTON_RELEASE, XCB_GRAB_MODE_ASYNC,
-            XCB_GRAB_MODE_ASYNC, xcb_screen->root, XCB_NONE, XCB_BUTTON_INDEX_3, XCB_MOD_MASK_ANY);
+            XCB_GRAB_MODE_ASYNC, xcb_screen->root, XCB_NONE, XCB_BUTTON_INDEX_3, XCB_MOD_MASK_SHIFT);*/
+
+    flush();
 
     return 1;
 }
@@ -77,23 +79,25 @@ void handle_xcb_events() {
 }
 
 void handle_ipc_input() {
-    char *input = read_from_socket();
+    int file_descriptor = accept_connection();
+    if (file_descriptor < 0)
+        return;
 
-    ipc_command_t command = ipc_determine_command(input);
+    char *input = read_from_socket(file_descriptor);
     char **args = ipc_split_input(input);
+    ipc_command_t command = ipc_get_command(args);
 
-    char *response;
-    if (ipc_commands[command])
-        response = ipc_commands[command](args);
-
-    if (response) {
-        log_debug("responding: %s", response);
-        write_to_socket(response);
+    char *reply;
+    if (ipc_commands[command]) {
+        reply = ipc_commands[command](args);
+        if (reply)
+            write_to_socket(reply, file_descriptor);
     }
+    close(file_descriptor);
 
     unsigned int index = 0;
-    while (args[index])
-        free(args[index++]);
+/*    while (args[index])
+        free(args[index++]);*/
 
     free(input);
 }
