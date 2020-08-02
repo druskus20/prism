@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
 #include "group.h"
-#include "handlers.h"
 #include "manager.h"
 #include "tile.h"
 #include "window.h"
