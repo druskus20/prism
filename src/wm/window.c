@@ -4,6 +4,7 @@
 #include "group.h"
 #include "window.h"
 
+#include "../util/vector.h"
 #include "../xcb/connection.h"
 #include "../xcb/window.h"
 
@@ -14,7 +15,7 @@ window_t *manage_window(xcb_window_t window_id) {
     window->parent = xcb_generate_id(xcb_connection);
 
     window->x      = window->y     = 0;
-    window->height = window->width = 1; // We don't know yet
+    window->height = window->width = 1;
 
     /* Create the parent window */
 
@@ -25,7 +26,7 @@ window_t *manage_window(xcb_window_t window_id) {
         XCB_CW_COLORMAP;
 
     unsigned int values[] = {
-        0xffffff << (0x5 * managed_windows->size), 0, 1, screen_colormap
+        0, 0, 1, screen_colormap
     };
 
     xcb_create_window(xcb_connection, 32, window->parent, xcb_screen->root,
@@ -44,6 +45,36 @@ window_t *manage_window(xcb_window_t window_id) {
     push_to_vector(managed_windows, window);
 
     return window;
+}
+
+void unmanage_window(xcb_window_t window_id) {
+    unsigned int index = 0;
+    window_t *window = NULL;
+
+    for (; index < managed_windows->size; index++) {
+        window = get_from_vector(managed_windows, index);
+
+        if (window->id == window_id) {
+            xcb_destroy_window(xcb_connection, window->parent);
+
+            pull_from_vector(managed_windows, index);
+
+            free(window);
+            return;
+        }
+    }
+}
+
+window_t *window_from_id(xcb_window_t id) {
+    window_t *window = NULL;
+    while ((window = vector_iterator(managed_windows))) {
+        if (window->id == id) {
+            reset_vector_iterator(managed_windows);
+            return window;
+        }
+    }
+
+    return NULL;
 }
 
 void change_managed_window_coordinates(window_t *window, float x, float y) {
