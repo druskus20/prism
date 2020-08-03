@@ -1,6 +1,7 @@
 #include "xcb.h"
 
 #include "../util/logging.h"
+#include "../util/vector.h"
 #include "../wm/manager.h"
 #include "../wm/tile.h"
 #include "../wm/window.h"
@@ -59,6 +60,7 @@ void handle_window_map_request(xcb_generic_event_t *generic_event) {
 
     push_window_to_group(focused_group, window);
     push_to_vector(managed_windows, window);
+
     focused_window = window;
 map:
     map_window(window_id);
@@ -71,22 +73,8 @@ void handle_window_destruction(xcb_generic_event_t *generic_event) {
 
     xcb_window_t window_id = event->window;
 
-    unsigned int index = 0;
-    window_t *window = NULL;
-    for (; index < managed_windows->size; index++) {
-        window = get_from_vector(managed_windows, index);
-        if (window->id == window_id) {
-            xcb_destroy_window(xcb_connection, window->parent);
-
-            pull_from_vector(managed_windows, index);
-            reset_vector_iterator(managed_windows);
-
-            free(window);
-
-            flush();
-            return;
-        }
-    }
+    unmanage_window(window_id);
+    flush();
 }
 
 void handle_button_down(xcb_generic_event_t *generic_event) {
