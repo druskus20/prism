@@ -11,3 +11,5 @@ typedef enum {
 } split_mode_t;
 
 void split_current_view_port(split_mode_t, group_t*, window_t*, window_t*);
+void claim_freed_space(window_t*, group_t*);
+void tile_children_recursive_real_estate_claim(window_t*, group_t*);
