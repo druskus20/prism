@@ -72,7 +72,12 @@ void handle_window_destruction(xcb_generic_event_t *generic_event) {
     event = (xcb_destroy_notify_event_t *)generic_event;
 
     xcb_window_t window_id = event->window;
+    window_t *window = window_from_id(window_id);
 
+    if (!window)
+        return;
+
+    claim_freed_space(window, focused_group);
     unmanage_window(window_id);
     flush();
 }
